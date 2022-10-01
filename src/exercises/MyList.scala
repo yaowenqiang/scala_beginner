@@ -24,7 +24,7 @@ trait MyTransformer[-A, B] {
 }
 
 
-object Empty extends MyList[Nothing] {
+case object Empty extends MyList[Nothing] {
     def head(): Nothing = throw new NoSuchElementException()
     def tail() :MyList[Nothing] = throw new NoSuchElementException()
     def isEmpty() :Boolean = true
@@ -37,6 +37,7 @@ object Empty extends MyList[Nothing] {
     def filter(predicate: MyPredicate[Nothing]) : MyList[Nothing] = Empty
 }
 
+//case class Cons[+A](head: A, tail: MyList[A]) extends MyList[A] {
 class Cons[+A](head: A, tail: MyList[A]) extends MyList[A] {
     def head() :A = head
     def tail() :MyList[A] = tail
@@ -68,6 +69,8 @@ object listTest extends App {
     println(list.isEmpty)
     println(list.toString)
     val listOfIntegers : MyList[Int] = new Cons(1, new Cons(2, new Cons(3, Empty)))
+//    val copiedListOfIntegers : listOfIntegers.clone()
+//    println(copiedListOfIntegers == listOfIntegers)
     val listOfIntegers2 : MyList[Int] = new Cons(4, new Cons(5, new Cons(6, Empty)))
     val listOfStrings : MyList[String] = new Cons("hello", new Cons("world", new Cons("how are you", Empty)))
     println(listOfIntegers)
