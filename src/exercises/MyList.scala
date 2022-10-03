@@ -1,6 +1,8 @@
 package exercises
 
-abstract class MyList[+A] extends App {
+import scala.runtime.Nothing$
+
+abstract class MyList[+A] {
     def head :A
     def tail :MyList[A]
     def isEmpty :Boolean
@@ -11,7 +13,33 @@ abstract class MyList[+A] extends App {
     def map[B](transformer: A => B) :MyList[B]
     def flatMap[B](transformer: A => MyList[B]) : MyList[B]
     def filter(predicate: A => Boolean) : MyList[A]
-    def ++[B >: A](list : MyList[B]) :MyList[B]
+
+    def ++[B >: A](List: MyList[B]): MyList[B]
+    // HOFs
+    def foreach(f: A => Unit) :Unit
+    def sort(compare: (A,A) => Int) :MyList[A]
+    def zipWith[B, C](list: MyList[B], zip:(A,B)=>C):MyList[C]
+    def fold[B](start: B)(operator: (B, A) => B):B
+    def toCurry(f: (Int, Int) => Int) : (Int => Int => Int) =
+        x => y => f(x, y)
+    def fromCurry(f: (Int =>  Int => Int)): (Int, Int) => Int =
+        (x, y) => f(x)(y)
+
+//    def compose(f: Int => Int, g: Int => Int) :Int => Int =
+//        x => f(g(x))
+    def compose[A, B, T](f: A => B, g: T => A) :T => B =
+        x => f(g(x))
+
+    def andThen[A,B,C](f: A => B, g: B => C) :A => C =
+        x => g(f(x))
+
+    def superAdder2: (Int => Int => Int) = toCurry(_ + _)
+    def add4 = superAdder2(4)
+//    println(add4(17))
+    def simpleAdder = fromCurry(superAdder2)
+//    println(simpleAdder(4, 17))
+
+
 }
 
 
@@ -35,6 +63,14 @@ case object Empty extends MyList[Nothing] {
     def map[B](transformer: Nothing => B) :MyList[B] = Empty
     def flatMap[B](transformer: Nothing => MyList[B]) : MyList[B] = Empty
     def filter(predicate: Nothing => Boolean) : MyList[Nothing] = Empty
+    def foreach(f: Nothing => Unit) :Unit = ()
+    def sort(compare: (Nothing, Nothing) => Int) = Empty
+    def zipWith[B, C](list: MyList[B], zip:(Nothing,B)=>C):MyList[C] = {
+        if(!list.isEmpty) throw new RuntimeException("Lists do not have the same length")
+        else Empty
+    }
+
+    def fold[B](start: B)(operator: (B, Nothing) => B):B = start
 }
 
 //case class Cons[+A](head: A, tail: MyList[A]) extends MyList[A] {
@@ -59,6 +95,33 @@ class Cons[+A](head: A, tail: MyList[A]) extends MyList[A] {
         if (predicate(head)) new Cons(head, tail.filter(predicate))
         else tail.filter(predicate)
 
+    def foreach(f: A => Unit): Unit = {
+        f(head)
+        tail.foreach(f)
+    }
+
+    def sort(compare: (A,A) => Int): MyList[A] = {
+        def insert(x: A, sortedList: MyList[A]) : MyList[A] = {
+            if (sortedList.isEmpty) new Cons(x, Empty)
+            else if (compare(x , sortedList.head)<= 0) new Cons(x, sortedList)
+            else new Cons(sortedList.head, insert(x, sortedList.tail))
+        }
+
+        val sortedTail = tail.sort(compare)
+        insert(head, sortedTail)
+    }
+
+    def zipWith[B, C](list: MyList[B], zip:(A,B)=>C):MyList[C] = {
+        if(list.isEmpty) throw new RuntimeException("Lists do not have the same length")
+        else
+            new Cons(zip(head, list.head),tail.zipWith(list.tail, zip))
+
+    }
+
+
+    def fold[B](start: B)(operator: (B, A) => B):B =
+        tail.fold(operator(start, head))(operator)
+
 }
 
 object listTest extends App {
@@ -73,6 +136,7 @@ object listTest extends App {
 //    println(copiedListOfIntegers == listOfIntegers)
     val listOfIntegers2 : MyList[Int] = new Cons(4, new Cons(5, new Cons(6, Empty)))
     val listOfStrings : MyList[String] = new Cons("hello", new Cons("world", new Cons("how are you", Empty)))
+    val anotherListOfStrings : MyList[String] = new Cons("hello", new Cons("world", new Cons("how are you", Empty)))
     println(listOfIntegers)
     println(listOfStrings)
 //    println(listOfIntegers.map(new Function1[Int, Int] {
@@ -94,5 +158,25 @@ object listTest extends App {
 //        override def apply(element: Int): MyList[Int] = new Cons[Int](element, new Cons(element + 1, Empty))
 //    }).toString)
     println(listOfIntegers.flatMap(elem  => new Cons(elem, new Cons(elem + 1, Empty))).toString)
+    listOfIntegers2.foreach(println)
+    println(listOfIntegers2.sort((x, y) => y -x))
+    println(listOfStrings.zipWith[String, String](anotherListOfStrings, _ + "-" + _))
+    println(listOfIntegers.fold(0)(_ + _))
+
+    val add2 = (x: Int)  => x + 2
+    val times3 = (x: Int) => x * 3
+
+    def compose[A, B, T](f: A => B, g: T => A) :T => B =
+        x => f(g(x))
+
+    def andThen[A,B,C](f: A => B, g: B => C) :A => C =
+        x => g(f(x))
+
+    val composed = compose(add2, times3)
+    val ordered = andThen(add2, times3)
+    println(composed(4)) // 4 * 3 + 2
+    println(ordered(4)) // (4 + 2) * 3
+
+
 
 }
