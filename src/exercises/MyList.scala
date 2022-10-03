@@ -75,18 +75,24 @@ object listTest extends App {
     val listOfStrings : MyList[String] = new Cons("hello", new Cons("world", new Cons("how are you", Empty)))
     println(listOfIntegers)
     println(listOfStrings)
-    println(listOfIntegers.map(new Function1[Int, Int] {
-        override def apply(element: Int): Int = element * 2
-    }).toString)
+//    println(listOfIntegers.map(new Function1[Int, Int] {
+//        override def apply(element: Int): Int = element * 2
+//    }).toString)
 
-    println(listOfIntegers.filter(new Function1[Int, Boolean] {
-        override def apply(element: Int): Boolean = element % 2 == 0
-    }).toString)
+//        println(listOfIntegers.map(elem => elem * 2).toString)
+        println(listOfIntegers.map(_ * 2).toString)
+
+    //    println(listOfIntegers.filter(new Function1[Int, Boolean] {
+//        override def apply(element: Int): Boolean = element % 2 == 0
+//    }).toString)
+//    println(listOfIntegers.filter(elem => elem % 2 == 0).toString)
+    println(listOfIntegers.filter(_ % 2 == 0).toString)
 
     println((listOfIntegers ++ listOfIntegers2).toString)
 
-    println(listOfIntegers.flatMap(new Function1[Int, MyList[Int]] {
-        override def apply(element: Int): MyList[Int] = new Cons[Int](element, new Cons(element + 1, Empty))
-    }).toString)
+//    println(listOfIntegers.flatMap(new Function1[Int, MyList[Int]] {
+//        override def apply(element: Int): MyList[Int] = new Cons[Int](element, new Cons(element + 1, Empty))
+//    }).toString)
+    println(listOfIntegers.flatMap(elem  => new Cons(elem, new Cons(elem + 1, Empty))).toString)
 
 }
