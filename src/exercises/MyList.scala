@@ -177,6 +177,21 @@ object listTest extends App {
     println(composed(4)) // 4 * 3 + 2
     println(ordered(4)) // (4 + 2) * 3
 
+    // for comprehension
+
+    val combination = for {
+        n <- listOfIntegers2
+        string <- listOfStrings
+    } yield n + "-" + string
+    println(combination)
+
+
+    println( for {
+        n <- listOfIntegers2
+        string <- listOfStrings
+    } yield n + "-" + string)
+
+
 
 
 }
