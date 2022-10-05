@@ -100,4 +100,6 @@ The default implementation for immutable sequences
 + Fast element addition: append/prepend 
 + implemented as a fixed-branched trie (branch factor 32)
 + good performance for large size
-+ 
+
+## Tuple
+
