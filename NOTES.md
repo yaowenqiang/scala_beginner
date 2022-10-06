@@ -103,3 +103,7 @@ The default implementation for immutable sequences
 
 ## Tuple
 
+## Options
+
+An option is a wrapper for a value that might be present or not
+
